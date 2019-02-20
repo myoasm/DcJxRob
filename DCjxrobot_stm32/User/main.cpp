@@ -68,17 +68,17 @@ void command_callback( const geometry_msgs::Twist& cmd_msg)
 }
 
 
-void move_base()
+void move_base()//控制小车底层运动的部分
 {
-	Kinematics::rpm req_rpm = kinematics.getRPM(required_linear_vel, 0, required_angular_vel);
+		Kinematics::rpm req_rpm = kinematics.getRPM(required_linear_vel, 0, required_angular_vel);
 	
-	int current_rpm1 = encoder1.getRPM();
+		int current_rpm1 = encoder1.getRPM();
     int current_rpm2 = encoder2.getRPM();
-	motor1.spin(motor1_pid.compute(req_rpm.motor1, current_rpm1));
+		motor1.spin(motor1_pid.compute(req_rpm.motor1, current_rpm1));
     motor2.spin(motor2_pid.compute(req_rpm.motor2, current_rpm2));
 	
-	Kinematics::velocities current_vel;
-	current_vel = kinematics.getVelocities(current_rpm1, current_rpm2);
+		Kinematics::velocities current_vel;
+		current_vel = kinematics.getVelocities(current_rpm1, current_rpm2);
 	
 	 //fill in the object
     raw_vel_msg.linear_x = current_vel.linear_x;
