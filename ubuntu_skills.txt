@@ -30,8 +30,10 @@ scp  -r local_dir username@servername:remote_dir
 ##Linux强制解锁命令
 		sudo rm /var/cache/apt/archives/lock
 		sudo rm /var/lib/dpkg/lock
+		
+		
 ##Q: 
-有时候调用历史命令，都是很长的那种，然后发现并不是自己想要的，需要重新输入，如何快速删除已有/已输入的命令/内容？ 
+	有时候调用历史命令，都是很长的那种，然后发现并不是自己想要的，需要重新输入，如何快速删除已有/已输入的命令/内容？ 
 或者说， 
 比如我输入了 # ps -aux | grep yum，这个命令还没执行，现在我不想用这个命令了，如果快速删除已输入的内容，也就是# ps -aux | grep yum？
 
@@ -40,10 +42,36 @@ A:
 
 附上一些其他较常使用的快捷键：
 
-ctrl + w —往回删除一个单词，光标放在最末尾 
-ctrl + k —往前删除到末尾，光标放在最前面（可以使用ctrl+a） 
-ctrl + u 删除光标以前的字符 
-ctrl + k 删除光标以后的字符 
-ctrl + a 移动光标至的字符头 
-ctrl + e 移动光标至的字符尾 
-ctrl + l 清屏
+	ctrl + w —往回删除一个单词，光标放在最末尾 
+	ctrl + k —往前删除到末尾，光标放在最前面（可以使用ctrl+a） 
+	ctrl + u 删除光标以前的字符 
+	ctrl + k 删除光标以后的字符 
+	ctrl + a 移动光标至的字符头 
+	ctrl + e 移动光标至的字符尾 
+	ctrl + l 清屏
+
+##关于kinect驱动和openni安装的过程详解（此处是arm单板的）
+		https://blog.csdn.net/W_peijian/article/details/68947340
+		
+
+##ros配置主从机：
+一般要求相同的ubuntu系统，机器人电脑为主机，电脑为从机配置如下（将下面的写入~/.bashrc文件中）：
+1，配置本机IP地址
+export ROS_MASTER_URI=http://（机器人IP）:11311
+export ROS_IP=(本机的IP) 
+2，配置机器人IP地址
+export ROS_MASTER_URI=http://（机器人IP）:11311
+export ROS_IP=(机器人IP) 
+
+主从机的etc/hosts文件也做相应修改
+--------------------- 
+##启动rtabmap_ros的命令
+	roslaunch freenect_launch freenect.launch depth_registration:=true
+	roslaunch rtabmap_ros rtabmap.launch rtabmap_args:="--delete_db_on_start"
+--------------------- 
+
+
+
+
+
+
