@@ -1,0 +1,242 @@
+## 关于构造函数 ##
+构造函数 ，是一种特殊的方法 。主要用来在创建对象时初始化对象， 即为对象成员变量赋初始值，总与new运算符一起使用在创建对象的语句中 。特别的一个类可以有多个构造函数 ，可根据其参数个数的不同或参数类型的不同来区分它们 即构造函数的重载。（摘自百度百科 构造函数 ）。
+
+一、最基本的构造函数
+
+1 class Base
+2 {
+3 public:
+4     Base(int var) : m_Var(var)
+5     {
+6     }
+7 private:
+8     int m_Var;
+9 };
+以上构造函数的执行过程：
+
+1）传参   2）给类数据成员开辟空间     3）执行冒号语法给数据成员初始化    4）执行构造函数括号里面的内容
+
+这里需要说明的是：冒号语法后面的内容相当于int a = 10;（初始化），而构造函数括号里面则是相当于是int a; a = 10;（赋初值）
+
+二、拷贝构造函数
+
+ 1 class Base
+ 2 {
+ 3 public:
+ 4     Base(int var) : m_Var(var)
+ 5     {
+ 6     }
+ 7     //拷贝构造函数
+ 8     Base(Base &ref) : m_Var(ref.m_Var)
+ 9     {
+10     }
+11 private:
+12     int m_Var;
+13 };
+为什么拷贝构造函数的参数只能用引用呢？
+
+这就要从拷贝构造函数式数码时候触发开始说起了，以下几种情况都会自动调用拷贝构造函数：
+
+1）用一个已有的对象初始化一个新对象的时候
+
+2）将一个对象以值传递的方式传给形参的时候
+
+3）函数返回一个对象的时候
+
+所以当一个对象以传递值的方式传一个函数的时候，拷贝构造函数自动的被调用来生成函数中的对象。如果一个对象是被传入自己的拷贝构造函数，它的拷贝构造函数将会被调用来拷贝这个对象这样复制才可以传入它自己的拷贝构造函数，这会导致无限循环直至栈溢出除了当对象传入函数的时候被隐式调用以外，拷贝构造函数在对象被函数返回的时候也同样的被调用。（摘自百度百科 拷贝构造函数 ）。
+
+拷贝构造函数，一般不需要自己编写，系统默认的拷贝构造函数就能抗住了，但是有些情况需要在构造的时候开辟空间，这时候就需要拷贝构造函数了，如下代码是摘自 林锐 博士的 高质量C++编程指南 一文。
+
+ 1 class String
+ 2 {
+ 3 public:
+ 4     String(const char *str = NULL); // 普通构造函数
+ 5     String(const String &other);    // 拷贝构造函数
+ 6     ~ String(void);                 // 析构函数
+ 7 private:
+ 8     char *m_data; // 用于保存字符串
+ 9 };
+10 // String 的析构函数
+11 String::~String(void) 
+12 {
+13     delete [] m_data;
+14     // 由于m_data 是内部数据类型，也可以写成 delete m_data;
+15 }
+16 
+17 // String 的普通构造函数
+18 String::String(const char *str) 
+19 {
+20     if(str==NULL)
+21     {
+22         m_data = new char[1]; // 若能加 NULL 判断则更好
+23         *m_data = '\0';
+24     }
+25     else
+26     {
+27         int length = strlen(str);
+28         m_data = new char[length+1]; // 若能加 NULL 判断则更好
+29         strcpy(m_data, str);
+30     }
+31 }
+32 // 拷贝构造函数
+33 String::String(const String &other) 
+34 {
+35     int length = strlen(other.m_data);
+36     m_data = new char[length+1]; // 若能加 NULL 判断则更好
+37     strcpy(m_data, other.m_data);
+38 }
+ 三、普通派生类构造函数的写法
+
+定义派生类对象的时候，会按如下步骤执行构造操作：
+
+1）传参     2）根据继承时的声明顺序构造基类    3）给类数据成员开辟空间    4）执行冒号语法后面的语句    5）执行构造函数函数体语句
+
+ 1 class Base
+ 2 {
+ 3 public:
+ 4     Base(int b) : m_b(b)
+ 5     {
+ 6     }
+ 7 private:
+ 8     int m_b;
+ 9 };
+10 
+11 class Derived : public Base
+12 {
+13 public:
+14     //普通派生类构造函数的写法
+15     Derived(int b, int d) : Base(b), m_d(d)
+16     {
+17     }
+18 private:
+19     int m_d;
+20 };
+再写一个多继承的示例：
+
+ 1 class Base1
+ 2 {
+ 3 public:
+ 4     Base1(int b1) : m_b1(b1)
+ 5     {
+ 6     }
+ 7 private:
+ 8     int m_b1;
+ 9 };
+10 
+11 class Base2
+12 {
+13 public:
+14     Base2(int b2) : m_b2(b2)
+15     {
+16     }
+17 private:
+18     int m_b2;
+19 };
+20 
+21 class Derived : public Base1, public Base2
+22 {
+23 public:
+24     Derived(int b1, int b2, int d) : Base1(b1), Base2(b2), m_d(d)
+25     { //注意冒号语法后面的顺序无所谓，创造基类是按照上面的继承声明顺序来进行的...
+26     }
+27 private:
+28     int m_d;
+29 };
+四、含有虚继承的派生类构造函数的写法
+
+为何要用到虚继承？
+
+虚继承主要是针对多继承时，出现二义性问题而提出的。比如，如下代码就需要用到虚继承，否则的话Derived类继承时，Base类就会不明确。
+
+虚继承构造函数的执行按照如下步骤：
+
+1）传参 2）创建基类，注意这时候需要显示创建所有“有参构造函数”的基类，包括直接基类，间接基类。 3）给类数据成员开辟空间  4）执行冒号语法  5）执行构造函数函数体
+
+注：你可能会疑惑，如下代码不是将Base间接基类创建了3次吗？其实不是这样的，编译器是这样处理的，当最远的派生类Derived创建了基类Base之后，其直接基类创建Base类的语句将会被忽略掉。
+
+ 1 class Base
+ 2 {
+ 3 public:
+ 4     Base(int b) : m_b(b)
+ 5     {
+ 6     }
+ 7 private:
+ 8     int m_b;
+ 9 };
+10 
+11 class Base1 : virtual public Base
+12 {
+13 public:
+14     Base1(int b, int b1) : Base(b), m_b1(b1)
+15     {
+16     }
+17 private:
+18     int m_b1;
+19 };
+20 
+21 class Base2 : virtual public Base
+22 {
+23 public:
+24     Base2(int b, int b2) : Base(b), m_b2(b2)
+25     {
+26     }
+27 private:
+28     int m_b2;
+29 };
+30 //虚继承，避免二义性
+31 class Derived : public Base1, public Base2
+32 {
+33 public:
+34     Derived(int b, int b1, int b2, int d) : Base(b), Base1(b, b1), Base2(b, b2), m_d(d)
+35     { //注意冒号语法后面的顺序无所谓，创造基类是按照上面的继承声明顺序来进行的...
+36     }
+37 private:
+38     int m_d;
+39 };
+五、关于虚析构
+
+虚析构一般伴随着多态而产生，多态主要方式就是用基类的指针或引用指向或引用派生类，而形成多态。
+
+但是这样就会存在一个问题，当我们析构的时候，由于是基类的指针，就会调用的是基类的构造函数，从而造成派生内存溢出。为了解决这个问题，引入了虚析构的概念。将基类的构造函数声明为虚，从而使其在调用析构函数的时候能够准确的调用派生类的析构函数。
+
+如下代码必须用到虚析构才能准确的析构派生类，并释放其占有内存。
+
+ 1 class Base
+ 2 {
+ 3 public:
+ 4     Base(int b) : m_b(b)
+ 5     {
+ 6     }
+ 7     //虚析构，使基类指针能准确的释放所指向的派生类里面的内容
+ 8     virtual ~Base()
+ 9     {
+10     }
+11 private:
+12     int m_b;
+13 };
+14 
+15 class Derived : public Base
+16 {
+17 public:
+18     Derived(int b, char *pStr) : Base(b)
+19     { 
+20         m_pStr = new char[strlen(pStr)+1];
+21         strcpy(m_pStr,pStr);
+22     }
+23     ~Derived()
+24     {
+25         delete m_pStr;
+26         m_pStr = NULL;
+27     }
+28 private:
+29     char *m_pStr;
+30 };
+31 
+32 int main(void)
+33 {
+34     char *pStr = "abcdefg";
+35     Base *b = new Derived(1,pStr);
+36     delete b;
+37 
+38     return 0;
+39 }
